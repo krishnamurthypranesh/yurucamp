@@ -14,7 +14,7 @@ ENV PATH $PATH:/root/.pyenv/bin
 
 WORKDIR /code
 
-COPY ./ /code
+COPY ./yurucamp /code
 
 RUN python3 -m pip install pipenv
 

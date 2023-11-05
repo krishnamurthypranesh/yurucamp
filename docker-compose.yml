@@ -1,21 +1,21 @@
 version: "3.8"
 
 services:
-  # app:
-  #   networks:
-  #     - yurucamp
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   container_name: backend
-  #   env_file: .env.compose
-  #   ports:
-  #     - "8000:8000"
-  #   volumes:
-  #     - "./yurucamp:/code/"
-  #   depends_on:
-  #     database:
-  #       condition: service_healthy
+  app:
+    networks:
+      - yurucamp
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend
+    env_file: .env.compose
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./yurucamp:/code/"
+    depends_on:
+      database:
+        condition: service_healthy
 
   database:
     networks:
@@ -25,13 +25,11 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ${PWD}/add-gis.sh:/docker-entrypoint-initdb.d/add-gis.sh
       - postgres-yurucamp:/data/db
     environment:
       - POSTGRESQL_USERNAME=yc
       - POSTGRESQL_PASSWORD=pass1234
       - POSTGRESQL_DATABASE=yurucamp
-      - POSTGRESQL_POSTGRES_PASSWORD=root1234
     healthcheck:
       test: ["CMD", "pg_isready", "--dbname=yurucamp", "--username=yc"]
       interval: 5s
