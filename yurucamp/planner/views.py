@@ -54,3 +54,13 @@ def weather_check(request):
         return JsonResponse(data={"detail": "Internal Server Error"}, status=500)
 
     return JsonResponse(data=response)
+
+
+@require_http_methods(["POST"])
+def trips_handler(request):
+    if request.method.upper() == "POST":
+        return create_trip(request)
+
+
+def create_trip(request):
+    pass

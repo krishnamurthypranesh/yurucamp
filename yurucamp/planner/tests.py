@@ -273,3 +273,29 @@ class TestWeatherCheck(TestCase):
         assert response is not None
         assert response.status_code == 200
         assert response.json() == expected
+
+
+class TestTripCreate:
+    def setUp(self):
+        # create a dummy user
+        # create a dummy session
+        # use that here
+        pass
+
+    def test_returns_400_if_locations_is_an_invalid_json(self):
+        assert 1 == 0
+
+    def test_returns_400_if_start_date_gt_end_date(self):
+        assert 1 == 0
+
+    def test_returns_400_if_start_date_in_past(self):
+        assert 1 == 0
+
+    def test_returns_400_if_end_date_in_past(self):
+        assert 1 == 0
+
+    def test_saves_trip_info_correctly(self):
+        assert 1 == 0
+
+    def test_returns_correct_response_for_saved_trip(self):
+        assert 1 == 0
