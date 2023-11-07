@@ -101,15 +101,12 @@ def create_trip(request):
         else Trip.TripStatus.PUBLISHED
     )
 
-    try:
-        trip = Trip(
-            user_id=user.id,
-            status=status.value,
-            locations=json.loads(data.model_dump_json()),
-        )
-        trip.save()
-    except Exception as e:
-        print(e)
+    trip = Trip(
+        user_id=user.id,
+        status=status.value,
+        locations=json.loads(data.model_dump_json()),
+    )
+    trip.save()
 
     res = {
         "id": trip.gid,
