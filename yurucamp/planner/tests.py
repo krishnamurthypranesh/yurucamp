@@ -1,16 +1,17 @@
 from datetime import datetime
-from unittest import mock
+from unittest import mock, TestCase
+import uuid
 
+from django.contrib.auth import models as auth_models
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from planner.models import Location
-
-CLIENT = Client()
+from planner.models import Location, Trip
 
 
 class TestListLocations(TestCase):
     def setUp(self):
+
         Location.objects.all().delete()
         Location(
             **{
@@ -29,10 +30,23 @@ class TestListLocations(TestCase):
             }
         ).save()
 
+        self.client = Client()
+
+        self.username = f"john-{str(uuid.uuid1()).split('-')[0]}"
+        self.password = "pass1234"
+
+        user = auth_models.User.objects.create_user(
+            username=self.username,
+            password=self.password,
+        )
+
+        self.user = user
+
+        self.client.login(username=self.username, password=self.password)
+
     def test_returns_all_locations(self):
-        response = CLIENT.get(
+        response = self.client.get(
             reverse("list_locations"),
-            headers={"key": "value"},
         )
 
         expected = {
@@ -64,18 +78,30 @@ class TestListLocations(TestCase):
     def test_returns_empty_list_if_db_table_is_empty(self):
         Location.objects.all().delete()
 
-        response = CLIENT.get(
+        response = self.client.get(
             reverse("list_locations"),
-            headers={"key": "value"},
         )
 
         assert response is not None
         assert response.status_code == 200
         assert response.json() == {"data": []}
 
+    def test_returns_401_if_user_is_unauthenticated(self):
+        c = Client()
+
+        response = c.get(
+            reverse("list_locations"),
+        )
+
+        assert response is not None
+        assert response.status_code == 401
+        assert response.json()["detail"] == "Unauthorized"
+
 
 class TestWeatherCheck(TestCase):
     def setUp(self):
+        self.client = Client()
+
         Location.objects.all().delete()
         Location(
             **{
@@ -93,6 +119,29 @@ class TestWeatherCheck(TestCase):
                 "city_coords": ["19.0760", "72.8777"],
             }
         ).save()
+
+        self.username = f"john-{str(uuid.uuid1()).split('-')[0]}"
+        self.password = "pass1234"
+
+        user = auth_models.User.objects.create_user(
+            username=self.username,
+            password=self.password,
+        )
+
+        self.user = user
+
+        self.client.login(username=self.username, password=self.password)
+
+    def test_returns_401_if_user_is_unauthenticated(self):
+        c = Client()
+
+        response = c.get(
+            reverse("weather_check"),
+        )
+
+        assert response is not None
+        assert response.status_code == 401
+        assert response.json()["detail"] == "Unauthorized"
 
     def test_uses_current_date_as_start_date_if_start_date_not_specified(self):
         expected = {
@@ -165,7 +214,7 @@ class TestWeatherCheck(TestCase):
 
             with mock.patch("planner.services.get_current_date") as mocked_date:
                 mocked_date.return_value = now.date()
-                response = CLIENT.get(
+                response = self.client.get(
                     reverse("weather_check"),
                     data={
                         "latitude": "19.0760",
@@ -182,7 +231,7 @@ class TestWeatherCheck(TestCase):
         with mock.patch("clients.weather.requests.get") as mocked_get:
             mocked_get.side_effect = Exception("random error")
 
-            response = CLIENT.get(
+            response = self.client.get(
                 reverse("weather_check"),
                 data={
                     "latitude": "19.0760",
@@ -261,7 +310,7 @@ class TestWeatherCheck(TestCase):
                 },
             }
 
-            response = CLIENT.get(
+            response = self.client.get(
                 reverse("weather_check"),
                 data={
                     "latitude": "19.0760",
@@ -275,27 +324,96 @@ class TestWeatherCheck(TestCase):
         assert response.json() == expected
 
 
-class TestTripCreate:
+class TestTripCreate(TestCase):
     def setUp(self):
-        # create a dummy user
-        # create a dummy session
-        # use that here
-        pass
+        self.client = Client()
+
+        self.username = f"john-{str(uuid.uuid1()).split('-')[0]}"
+        self.password = "pass1234"
+
+        user = auth_models.User.objects.create_user(
+            username=self.username,
+            password=self.password,
+        )
+
+        self.user = user
+
+        self.client.login(username=self.username, password=self.password)
+
+        self.itinerary = {
+            "start_date": "2023-11-11",
+            "end_date": "2023-11-21",
+            "locations": [
+                {
+                    "start_date": "2023-11-11",
+                    "end_date": "2023-11-21",
+                    "country": "IND",
+                    "city": "MUMBAI",
+                    "city_coords": ["22.0000", "22.0000"],
+                }
+            ],
+        }
+
+    def test_returns_401_if_user_is_unauthenticated(self):
+        c = Client()
+
+        response = c.post(
+            reverse("trips"),
+            data={
+                "itinerary": {},
+            },
+            content_type="application/json",
+        )
+
+        assert response is not None
+        assert response.status_code == 401
+        assert response.json()["detail"] == "Unauthorized"
 
     def test_returns_400_if_locations_is_an_invalid_json(self):
-        assert 1 == 0
+        response = self.client.post(
+            reverse("trips"),
+            data={
+                "itinerary": {},
+            },
+            content_type="application/json",
+        )
+
+        assert response is not None
+        assert response.status_code == 400
+        assert response.json()["detail"] == "Invalid trip format"
 
     def test_returns_400_if_start_date_gt_end_date(self):
-        assert 1 == 0
+        self.itinerary["start_date"] = "2023-11-22 00:00:00"
 
-    def test_returns_400_if_start_date_in_past(self):
-        assert 1 == 0
+        response = self.client.post(
+            reverse("trips"),
+            data={
+                "itinerary": self.itinerary,
+            },
+            content_type="application/json",
+        )
 
-    def test_returns_400_if_end_date_in_past(self):
-        assert 1 == 0
+        assert response is not None
+        assert response.status_code == 400
+        assert response.json()["detail"] == "start_date cannot be greater than end date"
 
     def test_saves_trip_info_correctly(self):
-        assert 1 == 0
+        response = self.client.post(
+            reverse("trips"),
+            data={
+                "itinerary": self.itinerary,
+            },
+            content_type="application/json",
+        )
 
-    def test_returns_correct_response_for_saved_trip(self):
-        assert 1 == 0
+        assert response is not None
+        assert response.status_code == 201
+
+        response = response.json()
+
+        trip = Trip.objects.get(gid=response["data"]["id"])
+
+        assert trip is not None
+        assert trip.status == Trip.TripStatus.DRAFT.value
+        assert trip.user_id == self.user.id
+        TestCase().assertDictEqual(trip.locations, self.itinerary)
