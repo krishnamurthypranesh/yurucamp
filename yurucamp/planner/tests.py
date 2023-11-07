@@ -11,7 +11,6 @@ from planner.models import Location, Trip
 
 class TestListLocations(TestCase):
     def setUp(self):
-
         Location.objects.all().delete()
         Location(
             **{
