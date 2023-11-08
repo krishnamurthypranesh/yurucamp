@@ -1,7 +1,9 @@
 import json
 import logging
 
+from django.contrib.auth import authenticate, login
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import pycountry
 from pydantic import ValidationError
@@ -23,6 +25,26 @@ def check_user_authn(f):
         return f(request)
 
     return inner
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def create_session(request):
+    try:
+        body = json.loads(request.body)
+    except json.decoder.JSONDecodeError as e:
+        logger.error("error decoding json body")
+        return JsonResponse(data={"detail": "improper data"}, status=400)
+
+    username = body.get("username")
+    password = body.get("password")
+
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request=request, user=user)
+        return JsonResponse(data={"detail": "success"}, status=201)
+
+    return JsonResponse(data={"detail": "failure"}, status=401)
 
 
 # since this data for this endpoint is not going to change very often, this is a great candidate for caching
