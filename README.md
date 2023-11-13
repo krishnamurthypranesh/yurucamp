@@ -81,8 +81,10 @@ I will be implementing something similar (but much simpler)
 - No global error handling. Errors are currently handled in the respective code that runs. Instead, a better way to do this would be to add middleware that automatically catches errors and returns the appropriate response based on the exception caught.
 - More documentation: Since the implementation itself is simple, I have not added any docstrings, or top-level documentation explaining the logic. This is another definite point of improvement
 
-# Items Currently Work in Progress
-- Tests for authentication module
-
-# Completed
+# Todo
 - [X] Custom authentication module (sans tests)
+- [ ] Tests for authentication module (WIP)
+- [ ] Global error handling middleware
+- [ ] Global logging in a standardized format
+- [ ] Bugs in /v1/trips/weather-check/
+- [ ] Setting up github actions for running tests
