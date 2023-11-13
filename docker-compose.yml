@@ -16,6 +16,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      firebase-auth:
+        condition: service_started
 
   database:
     networks:
@@ -36,6 +38,19 @@ services:
       timeout: 5s
       retries: 5
       start_period: 5s
+
+  firebase-auth:
+    networks:
+      - yurucamp
+    container_name: firebase-auth
+    build:
+      context: .
+      dockerfile: Dockerfile.Firebase
+    env_file: .env.compose
+    volumes:
+      - ./firebase.json:/app/firebase.json:ro
+    ports:
+      - "9099:9099"
 
 volumes:
   postgres-yurucamp:
