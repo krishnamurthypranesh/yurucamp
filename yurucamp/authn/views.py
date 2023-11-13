@@ -1,13 +1,12 @@
-from datetime import timedelta
 import json
 import logging
+from datetime import timedelta
 
+from authn.models import UserSession
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-
-from authn.models import UserSession
-from helpers import get_current_datetime, generate_session_id
+from helpers import generate_session_id, get_current_datetime
 
 logger = logging.getLogger("modle::authn")
 
@@ -25,7 +24,6 @@ def create_session(request):
 
     user = authenticate(request, username=username, password=password)
     if user is not None:
-        print(f"user: {username}=>is_authenticated: {user.is_authenticated}")
         login(request=request, user=user)
 
         user_session = UserSession(

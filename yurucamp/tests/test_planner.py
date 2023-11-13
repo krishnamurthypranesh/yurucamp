@@ -2,14 +2,17 @@ import uuid
 from datetime import datetime
 from unittest import TestCase, mock
 
-from django.contrib.auth import models as auth_models
+import requests
+from authn import models as auth_models
 from django.test import Client, TestCase
 from django.urls import reverse
 from planner.models import Location, Trip
 
+from yurucamp.settings import env
 
-class TestListLocations(TestCase):
-    def setUp(self):
+
+class TestsBase(TestCase):
+    def setUpClass(self):
         Location.objects.all().delete()
         Location(
             **{
@@ -30,18 +33,20 @@ class TestListLocations(TestCase):
 
         self.client = Client()
 
+    def setUp(self):
         self.username = f"john-{str(uuid.uuid1()).split('-')[0]}"
         self.password = "pass1234"
 
         user = auth_models.User.objects.create_user(
             username=self.username,
-            password=self.password,
         )
 
         self.user = user
 
         self.client.login(username=self.username, password=self.password)
 
+
+class TestListLocations(TestsBase):
     def test_returns_all_locations(self):
         response = self.client.get(
             reverse("list_locations"),
