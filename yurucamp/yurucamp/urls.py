@@ -17,7 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+import authn
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("v1/trips/", include("planner.urls")),
+    path("v1/authn/", include("authn.urls")),
 ]

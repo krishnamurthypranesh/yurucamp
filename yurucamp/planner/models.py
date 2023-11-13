@@ -4,15 +4,7 @@ import uuid
 from django.db import models
 from django.contrib.postgres import fields as pg_fields
 
-
-class CustomBaseModel(models.Model):
-    id = models.BigAutoField(primary_key=True)
-    gid = models.UUIDField(default=uuid.uuid1, null=False, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
+from common import CustomBaseModel
 
 
 class Location(CustomBaseModel):
