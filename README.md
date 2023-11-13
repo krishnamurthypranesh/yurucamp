@@ -82,4 +82,7 @@ I will be implementing something similar (but much simpler)
 - More documentation: Since the implementation itself is simple, I have not added any docstrings, or top-level documentation explaining the logic. This is another definite point of improvement
 
 # Items Currently Work in Progress
-- Custom authentication module that uses cognito for user authentication
+- Tests for authentication module
+
+# Completed
+- [X] Custom authentication module (sans tests)
