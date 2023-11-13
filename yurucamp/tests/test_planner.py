@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 from unittest import TestCase, mock
 
+import pytest
 from authn import models as auth_models
 from django.test import Client, TestCase
 from django.urls import reverse
@@ -9,9 +10,12 @@ from planner.models import Location, Trip
 
 from yurucamp.settings import env
 
+# pytestmark = pytest.mark.django_db
 
-class TestsBase(TestCase):
-    def setUpClass(self):
+
+class TestsBase:
+    @pytest.fixture(scope="function", autouse=True)
+    def setup(self, request, db, setup_user_account):
         Location.objects.all().delete()
         Location(
             **{
@@ -32,20 +36,25 @@ class TestsBase(TestCase):
 
         self.client = Client()
 
-    def setUp(self):
-        self.username = f"john-{str(uuid.uuid1()).split('-')[0]}"
-        self.password = "pass1234"
+        username, password = setup_user_account
 
-        user = auth_models.User.objects.create_user(
-            username=self.username,
+        response = self.client.post(
+            reverse("create_session"),
+            json={
+                "username": username,
+                "password": password,
+            },
+            headers={"Content-Type": "application/json"},
         )
+        breakpoint()
+        assert response is not None
+        assert response.status_code == 200
+        self.token = response.json()["token"]
 
-        self.user = user
 
-        self.client.login(username=self.username, password=self.password)
-
-
+@pytest.mark.django_db
 class TestListLocations(TestsBase):
+    @pytest.mark.django_db
     def test_returns_all_locations(self):
         response = self.client.get(
             reverse("list_locations"),
