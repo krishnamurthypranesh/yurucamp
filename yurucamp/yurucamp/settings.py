@@ -100,7 +100,7 @@ DATABASES = {
 
 AUTH_USER_MODEL = "authn.User"
 AUTHENTICATION_BACKENDS = [
-    "backends.AuthenticationBackend",
+    "backends.FirebaseAuthenticationBackend",
 ]
 
 AUTH_PASSWORD_VALIDATORS = [

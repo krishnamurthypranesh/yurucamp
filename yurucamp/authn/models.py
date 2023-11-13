@@ -10,29 +10,25 @@ from common import CustomBaseModel
 
 
 class UserManager(BaseUserManager):
-    def _create_user(self, username, email, **extra_fields):
-        if not email:
-            raise ValueError("Users must have an email address")
-
+    def _create_user(self, username, **extra_fields):
         now = timezone.now()
-        email = self.normalize_email(email)
+        username = self.normalize_email(username)
 
         user = self.model(
             username=username,
-            contact_email=email,
             is_staff=False,
             is_active=True,
             is_superuser=False,
             last_login=now,
-            date_joined=now,
+            joined_at=now,
             **extra_fields
         )
         user.save(using=self._db)
 
         return user
 
-    def create_user(self, username, email, **extra_fields):
-        return self._create_user(username, email, **extra_fields)
+    def create_user(self, username, **extra_fields):
+        return self._create_user(username, **extra_fields)
 
     def create_superuser(self, email, password, **extra_fields):
         user = self._create_user(email, password, **extra_fields)
@@ -40,8 +36,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, CustomBaseModel, PermissionsMixin):
-    username = models.CharField(max_length=32, null=False, unique=True)
-    contact_email = models.CharField(max_length=100, null=False, unique=True)
+    username = models.CharField(max_length=100, null=False, unique=True)
     last_login_at = models.DateTimeField(null=True, blank=True)
     joined_at = models.DateTimeField(null=True, blank=True)
 
@@ -54,7 +49,9 @@ class User(AbstractBaseUser, CustomBaseModel, PermissionsMixin):
         db_table = "users"
 
     USERNAME_FIELD = "username"
-    EMAIL_FIELD = "contact_email"
+    EMAIL_FIELD = "username"
+
+    objects = UserManager()
 
 
 class UserSession(models.Model):

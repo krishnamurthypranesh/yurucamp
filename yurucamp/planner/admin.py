@@ -4,15 +4,12 @@ from authn.models import User
 
 
 class UserAdmin(BaseUserAdmin):
-    fieldsets = ((None, {"fields": ("username", "contact_email", "last_login_at")}),)
+    fieldsets = ((None, {"fields": ("username", "last_login_at")}),)
     add_fieldsets = ((None, {"classes": ("wide",), "fields": ("email",)}),)
 
-    list_display = ("username", "contact_email", "last_login_at")
+    list_display = ("username", "last_login_at")
     list_filter = ()
-    search_fields = (
-        "username",
-        "contact_email",
-    )
+    search_fields = ("username",)
     ordering = ("id",)
 
 
