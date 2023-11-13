@@ -1,11 +1,10 @@
-from datetime import datetime
-from unittest import mock, TestCase
 import uuid
+from datetime import datetime
+from unittest import TestCase, mock
 
 from django.contrib.auth import models as auth_models
 from django.test import Client, TestCase
 from django.urls import reverse
-
 from planner.models import Location, Trip
 
 
