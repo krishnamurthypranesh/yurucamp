@@ -2,7 +2,6 @@ import uuid
 from datetime import datetime
 from unittest import TestCase, mock
 
-import requests
 from authn import models as auth_models
 from django.test import Client, TestCase
 from django.urls import reverse
