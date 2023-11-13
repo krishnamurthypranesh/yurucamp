@@ -7,7 +7,6 @@ from yurucamp.settings import env
 
 class FirebaseAuthenticationBackend(object):
     def __init__(self):
-        print(dir(env))
         self._backend = self.__FirebaseAuthenticationBackend(
             url_prefix=env("APP_FIREBASE_AUTH_URL"),
             api_key=env("APP_FIREBASE_API_KEY"),
@@ -23,8 +22,6 @@ class FirebaseAuthenticationBackend(object):
                 "email": username,
                 "password": password,
             }
-
-            print(f"payload: {payload}")
 
             endpoint = "signInWithPassword"
 

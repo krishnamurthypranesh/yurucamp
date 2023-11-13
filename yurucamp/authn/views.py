@@ -24,16 +24,13 @@ def create_session(request):
     password = body.get("password")
 
     user = authenticate(request, username=username, password=password)
-    print(f"user: {user.username}")
     if user is not None:
         print(f"user: {username}=>is_authenticated: {user.is_authenticated}")
         login(request=request, user=user)
 
-        session_id = generate_session_id()
-        print(f"session_id: {session_id}")
         user_session = UserSession(
             user_id=user.id,
-            session_id=session_id,
+            session_id=generate_session_id(),
             expires_at=get_current_datetime() + timedelta(days=3),
         )
         user_session.save()

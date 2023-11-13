@@ -22,10 +22,6 @@ class AuthenticationMiddleware(MiddlewareMixin):
             _, token = auth_header.split(" ")
             user_session = UserSession.objects.get(session_id=token)
 
-            print(
-                f"expires_at: {user_session.expires_at} now: {get_current_datetime()}"
-            )
-
             if (
                 user_session.expires_at.astimezone(timezone.utc)
                 < get_current_datetime()
