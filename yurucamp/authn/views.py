@@ -14,7 +14,6 @@ logger = logging.getLogger("module::authn")
 @require_http_methods(["POST"])
 def create_session(request):
     try:
-        logging.error(f"request body: {request.body}")
         body = json.loads(request.body)
     except json.decoder.JSONDecodeError as e:
         logger.error("error decoding json body")

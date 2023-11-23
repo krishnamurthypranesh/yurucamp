@@ -1,34 +1,22 @@
 import json
 import logging
 
-from django.views.decorators.http import require_http_methods
-from django.http import JsonResponse
 import pycountry
-from pydantic import ValidationError
-
 from clients import OpenMeteoClient
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 from helpers import get_current_date
 from planner.models import Location, Trip
-from planner.services import WeatherCheckService
 from planner.schema import Itinerary
+from planner.services import WeatherCheckService
+from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)
-
-
-def check_user_authn(f):
-    def inner(request):
-        if not request.user.is_authenticated:
-            return JsonResponse(data={"detail": "Unauthorized"}, status=401)
-
-        return f(request)
-
-    return inner
 
 
 # since this data for this endpoint is not going to change very often, this is a great candidate for caching
 # TODO: Consider implementing a local cache if there's enough time left over after writing the other endpoints
 @require_http_methods(["GET"])
-@check_user_authn
 def list_locations(request):
     # no pagination because the example uses only 8 records
     # in a real world scenario, this endpoint would be paginated
@@ -51,7 +39,6 @@ def list_locations(request):
 
 
 @require_http_methods(["GET"])
-@check_user_authn
 def weather_check(request):
     response = {}
 
@@ -74,7 +61,6 @@ def weather_check(request):
 
 
 @require_http_methods(["POST"])
-@check_user_authn
 def trips_handler(request):
     if request.method.upper() == "POST":
         return create_trip(request)

@@ -16,8 +16,3 @@ repos:
         name: isort
         entry: pipenv run isort --profile black
         language: system
-  # - repo: https://github.com/pycqa/isort
-  #   rev: 5.6.4
-  #   hooks:
-  #     - id: isort
-  #       args: ["--profile", "black", "--filter-files"]

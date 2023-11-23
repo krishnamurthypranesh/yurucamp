@@ -1,9 +1,9 @@
-import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest import TestCase, mock
 
 import pytest
 from authn import models as auth_models
+from authn.models import User
 from django.test import Client, TestCase
 from django.urls import reverse
 from planner.models import Location, Trip
@@ -40,16 +40,17 @@ class TestsBase:
 
         response = self.client.post(
             reverse("create_session"),
-            json={
+            data={
                 "username": username,
                 "password": password,
             },
-            headers={"Content-Type": "application/json"},
+            content_type="application/json",
         )
-        breakpoint()
         assert response is not None
-        assert response.status_code == 200
+        assert response.status_code == 201
         self.token = response.json()["token"]
+
+        self.user = User.objects.get(username=username)
 
 
 @pytest.mark.django_db
@@ -58,6 +59,7 @@ class TestListLocations(TestsBase):
     def test_returns_all_locations(self):
         response = self.client.get(
             reverse("list_locations"),
+            headers={"Authorization": f"Bearder {self.token}"},
         )
 
         expected = {
@@ -91,6 +93,9 @@ class TestListLocations(TestsBase):
 
         response = self.client.get(
             reverse("list_locations"),
+            headers={
+                "Authorization": f"Bearer {self.token}",
+            },
         )
 
         assert response is not None
@@ -109,40 +114,7 @@ class TestListLocations(TestsBase):
         assert response.json()["detail"] == "Unauthorized"
 
 
-class TestWeatherCheck(TestCase):
-    def setUp(self):
-        self.client = Client()
-
-        Location.objects.all().delete()
-        Location(
-            **{
-                "country_code": "IND",
-                "city_code": "NEW_DELHI",
-                "city_display_name": "New Delhi",
-                "city_coords": ["28.6139", "77.2090"],
-            }
-        ).save()
-        Location(
-            **{
-                "country_code": "IND",
-                "city_code": "MUMBAI",
-                "city_display_name": "Mumbai",
-                "city_coords": ["19.0760", "72.8777"],
-            }
-        ).save()
-
-        self.username = f"john-{str(uuid.uuid1()).split('-')[0]}"
-        self.password = "pass1234"
-
-        user = auth_models.User.objects.create_user(
-            username=self.username,
-            password=self.password,
-        )
-
-        self.user = user
-
-        self.client.login(username=self.username, password=self.password)
-
+class TestWeatherCheck(TestsBase):
     def test_returns_401_if_user_is_unauthenticated(self):
         c = Client()
 
@@ -231,6 +203,7 @@ class TestWeatherCheck(TestCase):
                         "latitude": "19.0760",
                         "longitude": "72.8777",
                     },
+                    headers={"Authorization": f"Bearer {self.token}"},
                 )
 
         assert response is not None
@@ -249,6 +222,7 @@ class TestWeatherCheck(TestCase):
                     "longitude": "72.8777",
                     "trip_date": "2023-12-25",
                 },
+                headers={"Authorization": f"Bearer {self.token}"},
             )
 
         assert response is not None
@@ -328,6 +302,7 @@ class TestWeatherCheck(TestCase):
                     "longitude": "72.8777",
                     "trip_date": "2023-11-10",
                 },
+                headers={"Authorization": f"Bearer {self.token}"},
             )
 
         assert response is not None
@@ -335,29 +310,18 @@ class TestWeatherCheck(TestCase):
         assert response.json() == expected
 
 
-class TestTripCreate(TestCase):
-    def setUp(self):
-        self.client = Client()
-
-        self.username = f"john-{str(uuid.uuid1()).split('-')[0]}"
-        self.password = "pass1234"
-
-        user = auth_models.User.objects.create_user(
-            username=self.username,
-            password=self.password,
-        )
-
-        self.user = user
-
-        self.client.login(username=self.username, password=self.password)
-
+class TestTripCreate(TestsBase):
+    @pytest.fixture(scope="function", autouse=True)
+    def setup_method(self):
+        start_date = (datetime.now() + timedelta(days=1)).date()
+        end_date = (datetime.now() + timedelta(days=11)).date()
         self.itinerary = {
-            "start_date": "2023-11-11",
-            "end_date": "2023-11-21",
+            "start_date": str(start_date),
+            "end_date": str(end_date),
             "locations": [
                 {
-                    "start_date": "2023-11-11",
-                    "end_date": "2023-11-21",
+                    "start_date": str(start_date),
+                    "end_date": str(end_date),
                     "country": "IND",
                     "city": "MUMBAI",
                     "city_coords": ["22.0000", "22.0000"],
@@ -387,6 +351,7 @@ class TestTripCreate(TestCase):
                 "itinerary": {},
             },
             content_type="application/json",
+            headers={"Authorization": f"Bearer {self.token}"},
         )
 
         assert response is not None
@@ -394,7 +359,7 @@ class TestTripCreate(TestCase):
         assert response.json()["detail"] == "Invalid trip format"
 
     def test_returns_400_if_start_date_gt_end_date(self):
-        self.itinerary["start_date"] = "2023-11-22 00:00:00"
+        self.itinerary["start_date"] = str((datetime.now() + timedelta(days=12)).date())
 
         response = self.client.post(
             reverse("trips"),
@@ -402,6 +367,7 @@ class TestTripCreate(TestCase):
                 "itinerary": self.itinerary,
             },
             content_type="application/json",
+            headers={"Authorization": f"Bearer {self.token}"},
         )
 
         assert response is not None
@@ -415,6 +381,7 @@ class TestTripCreate(TestCase):
                 "itinerary": self.itinerary,
             },
             content_type="application/json",
+            headers={"Authorization": f"Bearer {self.token}"},
         )
 
         assert response is not None
