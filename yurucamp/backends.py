@@ -1,15 +1,15 @@
 import requests
-
-from exc import IncorrectAuthenticationCredentialsException
 from authn.models import User
-from yurucamp.settings import env
+from exc import ApplicationBaseException, IncorrectAuthenticationCredentialsException
+
+from yurucamp.settings import get_env
 
 
 class FirebaseAuthenticationBackend(object):
     def __init__(self):
         self._backend = self.__FirebaseAuthenticationBackend(
-            url_prefix=env("APP_FIREBASE_AUTH_URL"),
-            api_key=env("APP_FIREBASE_API_KEY"),
+            url_prefix=get_env().get_env_val("APP_FIREBASE_AUTH_URL"),
+            api_key=get_env().get_env_val("APP_FIREBASE_API_KEY"),
         )
 
     class __FirebaseAuthenticationBackend:
@@ -32,12 +32,16 @@ class FirebaseAuthenticationBackend(object):
                 headers={"Content-Type": "application/json"},
             )
 
-            if response.status_code == 400:
-                raise IncorrectAuthenticationCredentialsException()
+            if response.status_code != 200:
+                if response.status_code == 400:
+                    raise IncorrectAuthenticationCredentialsException()
+                else:
+                    raise ApplicationBaseException(
+                        err_msg="Internal server error",
+                        status_code=500,
+                    )
             else:
-                response.raise_for_status()
-
-            return response.json()
+                return response.json()
 
     def authenticate(self, request, username, password):
         try:

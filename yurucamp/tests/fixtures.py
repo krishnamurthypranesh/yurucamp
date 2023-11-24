@@ -4,7 +4,9 @@ import pytest
 import requests
 from authn.models import User
 
-from yurucamp.settings import env
+from yurucamp.settings import get_env
+
+env = get_env()
 
 
 @pytest.fixture(scope="function")
@@ -14,9 +16,9 @@ def setup_firebase_user():
     passwd = username
 
     response = requests.post(
-        f'{env("APP_FIREBASE_AUTH_URL")}:signUp',
+        f'{env.get_env_val("APP_FIREBASE_AUTH_URL")}:signUp',
         params={
-            "key": env("APP_FIREBASE_API_KEY"),
+            "key": env.get_env_val("APP_FIREBASE_API_KEY"),
         },
         json={
             "email": username,

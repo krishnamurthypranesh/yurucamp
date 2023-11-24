@@ -2,8 +2,6 @@ from authn import models
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from yurucamp.settings import env
-
 
 class TestAuthenticationMiddleware(TestCase):
     def setUp(self):

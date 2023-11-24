@@ -14,8 +14,23 @@ from pathlib import Path
 
 import environ
 
-env = environ.Env()
-env.read_env(env.str("ENV_PATH", "./.env"))
+
+class Env:
+    def __init__(self):
+        env = environ.Env()
+        env.read_env(env.str("ENV_PATH", "./.env"))
+
+        self.env = env
+
+    def get_env_val(self, var_name: str):
+        return self.env(var_name)
+
+
+__env = Env()
+
+
+def get_env():
+    return __env
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -86,11 +101,11 @@ WSGI_APPLICATION = "yurucamp.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("DB_NAME"),
-        "USER": env("DB_USER"),
-        "PASSWORD": env("DB_PASSWD"),
-        "HOST": env("DB_HOST"),
-        "PORT": env("DB_PORT"),
+        "NAME": __env.get_env_val("DB_NAME"),
+        "USER": __env.get_env_val("DB_USER"),
+        "PASSWORD": __env.get_env_val("DB_PASSWD"),
+        "HOST": __env.get_env_val("DB_HOST"),
+        "PORT": __env.get_env_val("DB_PORT"),
     },
 }
 
