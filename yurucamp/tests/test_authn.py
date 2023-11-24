@@ -7,8 +7,6 @@ from authn.models import User, UserSession
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from yurucamp.settings import env
-
 
 @pytest.mark.django_db
 class TestCreateUserSession:

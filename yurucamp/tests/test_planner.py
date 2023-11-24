@@ -8,10 +8,6 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from planner.models import Location, Trip
 
-from yurucamp.settings import env
-
-# pytestmark = pytest.mark.django_db
-
 
 class TestsBase:
     @pytest.fixture(scope="function", autouse=True)

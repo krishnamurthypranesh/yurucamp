@@ -1,4 +1,4 @@
-class BaseException(Exception):
+class ApplicationBaseException(Exception):
     def __init__(self, err_msg: str, status_code: int):
         self.err_msg = str
         self.status_code = status_code
@@ -6,13 +6,13 @@ class BaseException(Exception):
         super().__init__(err_msg)
 
 
-class InvalidTripDateExcpetion(BaseException):
+class InvalidTripDateExcpetion(ApplicationBaseException):
     def __init__(self, err_msg="Invalid trip date supplied"):
         self.status_code = 400
         super().__init__(err_msg, status_code=400)
 
 
-class IncorrectAuthenticationCredentialsException(BaseException):
+class IncorrectAuthenticationCredentialsException(ApplicationBaseException):
     def __init__(self, err_msg="Incorrect credentials provided"):
         self.status_code = 401
         super().__init__(err_msg, status_code=401)
