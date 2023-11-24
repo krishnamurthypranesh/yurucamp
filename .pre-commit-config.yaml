@@ -9,3 +9,10 @@ repos:
     rev: 22.3.0
     hooks:
       - id: black
+  - repo: local
+    hooks:
+      - id: isort
+        stages: [commit]
+        name: isort
+        entry: pipenv run isort --profile black
+        language: system
