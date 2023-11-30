@@ -9,10 +9,12 @@ repos:
     rev: 22.3.0
     hooks:
       - id: black
-  - repo: local
+  - repo: https://github.com/asottile/seed-isort-config
+    rev: v2.2.0
+    hooks:
+      - id: seed-isort-config
+  - repo: https://github.com/timothycrosley/isort
+    rev: 5.11.5  # pick the isort version you'd like to use from https://github.com/timothycrosley/isort/releases
     hooks:
       - id: isort
-        stages: [commit]
-        name: isort
-        entry: pipenv run isort --profile black
-        language: system
+        args: ["--profile", "black", "--filter-files"]
