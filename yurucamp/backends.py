@@ -1,8 +1,12 @@
+import logging
+
 import requests
 from authn.models import User
 from exc import ApplicationBaseException, IncorrectAuthenticationCredentialsException
 
 from yurucamp.settings import get_env
+
+logger = logging.getLogger(__name__)
 
 
 class FirebaseAuthenticationBackend(object):
@@ -47,7 +51,7 @@ class FirebaseAuthenticationBackend(object):
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
-            print(f"user: {username} does not exist")
+            logger.error(f"user: {username} does not exist")
             return
 
         self._backend.user_sign_in(username=username, password=password)
